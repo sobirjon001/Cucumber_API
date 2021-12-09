@@ -1,7 +1,6 @@
 package com.cydeo.projects.frutApi;
 
 import com.cydeo.utils.ConfigurationReader;
-import com.cydeo.utils.Storage;
 import com.cydeo.utils.Util_stuff;
 import com.google.gson.JsonObject;
 import io.cucumber.java.en.Given;
@@ -9,8 +8,6 @@ import io.cucumber.java.en.Given;
 import java.util.Map;
 
 public class API_OrderingFruits implements Util_stuff {
-
-    Storage stg = new Storage().getInstance();
 
     final String customers = "/customers/";
 
@@ -28,7 +25,7 @@ public class API_OrderingFruits implements Util_stuff {
         id = id.substring(id.lastIndexOf("/") + 1);
 
         customer.addProperty("id", id);
-//        stg.savePayloadByName(name, customer);
+        stg.savePayloadByName(name, customer);
         System.out.println("id = " + id);
     }
 }

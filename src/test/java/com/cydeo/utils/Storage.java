@@ -2,21 +2,25 @@ package com.cydeo.utils;
 
 import com.google.gson.JsonObject;
 
-import java.util.Map;
+import java.util.HashMap;
 
 public class Storage {
 
-    public Storage() {
+    private static Storage storage;
+    private HashMap<String, JsonObject> payloads = new HashMap<>();
+
+    private Storage() {
+        storage = this;
     }
 
-    private Map<String, JsonObject> payloads;
-
-    private Storage storage = null;
-
-    public Storage getInstance() {
+    public static Storage getInstance() {
         return storage == null
                 ? new Storage()
                 : storage;
+    }
+
+    public static void reset() {
+        storage = new Storage();
     }
 
     public void savePayloadByName(String name, JsonObject payload) {
