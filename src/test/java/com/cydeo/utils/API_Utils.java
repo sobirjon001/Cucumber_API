@@ -38,7 +38,7 @@ public class API_Utils {
                         .accept(ContentType.JSON)
                         .body(payload.toString()).
                         when()
-                        .post(baseUrl + endPoint).prettyPeek();
+                        .post(baseUrl + endPoint);
         Assert.assertEquals(response.getStatusCode(), 201);
         responseBody = gson.fromJson(response.getBody().asString(), JsonObject.class);
     }
@@ -50,7 +50,7 @@ public class API_Utils {
                         .accept(ContentType.JSON)
                         .body(payload.toString()).
                         when()
-                        .patch(baseUrl + endPoint).prettyPeek();
+                        .patch(baseUrl + endPoint);
         Assert.assertEquals(response.getStatusCode(), 200);
         responseBody = gson.fromJson(response.getBody().asString(), JsonObject.class);
     }
@@ -76,5 +76,15 @@ public class API_Utils {
                         .get(baseUrl + endPoint);
         Assert.assertEquals(response.getStatusCode(), 200);
         responseBody = gson.fromJson(response.getBody().asString(), JsonObject.class);
+    }
+
+    public void Delete() {
+        Response response =
+                given()
+                        .contentType(ContentType.JSON)
+                        .accept(ContentType.JSON).
+                        when()
+                        .delete(baseUrl + endPoint);
+        Assert.assertEquals(response.getStatusCode(), 200);
     }
 }
