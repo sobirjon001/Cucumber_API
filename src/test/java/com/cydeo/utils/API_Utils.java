@@ -3,7 +3,6 @@ package com.cydeo.utils;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import org.junit.Assert;
@@ -36,10 +35,10 @@ public class API_Utils {
                 given()
                         .contentType(ContentType.JSON)
                         .accept(ContentType.JSON)
-                        .body(payload.toString()).
+                        .body(payload.toString()).log().all().
                         when()
                         .post(baseUrl + endPoint);
-        Assert.assertEquals(response.getStatusCode(), 201);
+        Assert.assertEquals("Unexpected status code!", 201, response.getStatusCode());
         responseBody = gson.fromJson(response.getBody().asString(), JsonObject.class);
     }
 
@@ -48,10 +47,10 @@ public class API_Utils {
                 given()
                         .contentType(ContentType.JSON)
                         .accept(ContentType.JSON)
-                        .body(payload.toString()).
+                        .body(payload.toString()).log().all().
                         when()
                         .patch(baseUrl + endPoint);
-        Assert.assertEquals(response.getStatusCode(), 200);
+        Assert.assertEquals("Unexpected status code!",200, response.getStatusCode());
         responseBody = gson.fromJson(response.getBody().asString(), JsonObject.class);
     }
 
@@ -59,10 +58,10 @@ public class API_Utils {
         Response response =
                 given()
                         .contentType(ContentType.JSON)
-                        .accept(ContentType.JSON).
+                        .accept(ContentType.JSON).log().all().
                         when()
                         .get(baseUrl + endPoint);
-        Assert.assertEquals(response.getStatusCode(), 200);
+        Assert.assertEquals("Unexpected status code!", 200, response.getStatusCode());
         responseBody = gson.fromJson(response.getBody().asString(), JsonObject.class);
     }
 
@@ -74,7 +73,7 @@ public class API_Utils {
                         .queryParam(key, value).
                         when()
                         .get(baseUrl + endPoint);
-        Assert.assertEquals(response.getStatusCode(), 200);
+        Assert.assertEquals("Unexpected status code!", 200, response.getStatusCode());
         responseBody = gson.fromJson(response.getBody().asString(), JsonObject.class);
     }
 
@@ -85,6 +84,6 @@ public class API_Utils {
                         .accept(ContentType.JSON).
                         when()
                         .delete(baseUrl + endPoint);
-        Assert.assertEquals(response.getStatusCode(), 200);
+        Assert.assertEquals("Unexpected status code!", 200, response.getStatusCode());
     }
 }

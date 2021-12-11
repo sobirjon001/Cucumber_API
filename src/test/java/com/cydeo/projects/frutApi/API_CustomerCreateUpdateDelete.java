@@ -33,7 +33,7 @@ public class API_CustomerCreateUpdateDelete implements Util_stuff {
                 api.getResponseBody().get("customer_url").getAsString());
 
         api.getResponseBody().addProperty("id", id);
-        stg.savePayloadByName(name, customer);
+        stg.savePayloadByName(name, api.getResponseBody());
         System.out.println("id = " + id);
     }
 
@@ -56,24 +56,30 @@ public class API_CustomerCreateUpdateDelete implements Util_stuff {
             JsonArray customers = api.getResponseBody().get("customers").getAsJsonArray();
             customersArray.getAsJsonArray("customers").addAll(customers);
         }
+
+        for (int i = 0; i < customersArray.getAsJsonArray("customers").size(); i++) {
+            customersArray.getAsJsonArray("customers").get(i).getAsJsonObject().addProperty("id",
+                    useful_utils.getCustomerIdFromURL(customersArray.getAsJsonArray("customers").get(i)
+                            .getAsJsonObject().get("customer_url").getAsString()));
+        }
         stg.savePayloadByName(name, customersArray);
     }
 
     @Then("I validate customer by id {string} created")
-    public void I_validate_customer_by_id_created(String expectedId) {
-        Assert.assertTrue(expectedId + " is not found! - FAIL!",
-                doesCustomerIdExist(expectedId));
-        System.out.println(expectedId + " is fount! - PASS!");
+    public void I_validate_customer_by_id_created(String idPath) {
+        Assert.assertTrue(idPath + " is not found! - FAIL!",
+                doesCustomerIdExist(idPath));
+        System.out.println(idPath + " is fount! - PASS!");
     }
 
     @Then("I validate customer by id {string} does not exist")
-    public void I_validate_customer_by_id_does_not_exist(String expectedId) {
-        Assert.assertFalse(expectedId + " is found! - FAIL!",
-                doesCustomerIdExist(expectedId));
-        System.out.println(expectedId + " is not fount! - PASS!");
+    public void I_validate_customer_by_id_does_not_exist(String idPath) {
+        Assert.assertFalse(idPath + " is found! - FAIL!",
+                doesCustomerIdExist(idPath));
+        System.out.println(idPath + " is not fount! - PASS!");
     }
 
-    public boolean doesCustomerIdExist(String id) {
+    public boolean doesCustomerIdExist(String idPath) {
         api.setBaseUrl(ConfigurationReader.getProperty("fruitAPIBaseUrl"));
         api.setEndPoint(customersEndPoint);
         api.Get();
@@ -90,7 +96,7 @@ public class API_CustomerCreateUpdateDelete implements Util_stuff {
             for (int i = 0; i < customers.size(); i++) {
                 String actualId = useful_utils.getCustomerIdFromURL(
                         customers.get(i).getAsJsonObject().get("customer_url").getAsString());
-                if (actualId.equals(useful_utils.defineValue(id))) {
+                if (actualId.equals(useful_utils.defineValue(idPath))) {
                     System.out.println("We found our id, it is " + actualId);
                     found = true;
                     break;
@@ -100,14 +106,15 @@ public class API_CustomerCreateUpdateDelete implements Util_stuff {
         return found;
     }
 
-    @When("I update customer by name {string} by id {string} with data")
-    public void I_update_customer_by_id_with_data(String name, String id, Map<String, String> data) {
+    @When("I update customer by id {string} and save with name {string} with data")
+    public void I_update_customer_by_id_and_save_with_name_with_data(String name, String idPath, Map<String, String> data) {
         JsonObject customer = new JsonObject();
         for (String key : data.keySet()) {
             customer.addProperty(key, data.get(key));
         }
+        String id = useful_utils.defineValue(idPath);
         api.setBaseUrl(ConfigurationReader.getProperty("fruitAPIBaseUrl"));
-        api.setEndPoint(customersByIdEndPoint.replace("{id}", useful_utils.defineValue(id)));
+        api.setEndPoint(customersByIdEndPoint.replace("{id}", id));
         api.Patch(customer);
 
         api.getResponseBody().addProperty("id", id);
@@ -115,12 +122,12 @@ public class API_CustomerCreateUpdateDelete implements Util_stuff {
     }
 
     @Then("I validate customer by id {string} created/updated with data")
-    public void I_validate_customer_by_id_created_with_data(String id, Map<String, String> data) {
-        I_validate_customer_by_id_created(id);
+    public void I_validate_customer_by_id_created_with_data(String idPath, Map<String, String> data) {
+        I_validate_customer_by_id_created(idPath);
         JsonArray customers = api.getResponseBody().get("customers").getAsJsonArray();
         for (int i = 0; i < customers.size(); i++) {
             if (useful_utils.getCustomerIdFromURL(customers.get(i).getAsJsonObject().get("customer_url").getAsString())
-                    .equals(useful_utils.defineValue(id))) {
+                    .equals(useful_utils.defineValue(idPath))) {
                 for (String key : data.keySet()) {
                     Assert.assertEquals(key + " mismatch! - FAIL!",
                             useful_utils.defineValue(data.get(key)),
@@ -133,9 +140,9 @@ public class API_CustomerCreateUpdateDelete implements Util_stuff {
     }
 
     @When("I get customer by id {string} and save by {string}")
-    public void I_get_customer_by_id(String id, String name) {
+    public void I_get_customer_by_id(String idPath, String name) {
         api.setBaseUrl(ConfigurationReader.getProperty("fruitAPIBaseUrl"));
-        api.setEndPoint(customersByIdEndPoint.replace("{id}", useful_utils.defineValue(id)));
+        api.setEndPoint(customersByIdEndPoint.replace("{id}", useful_utils.defineValue(idPath)));
         api.Get();
 
         api.getResponseBody().addProperty("id",
@@ -144,9 +151,9 @@ public class API_CustomerCreateUpdateDelete implements Util_stuff {
     }
 
     @When("I delete a customer by id {string}")
-    public void I_delete_a_customer_by_id(String id) {
+    public void I_delete_a_customer_by_id(String idPath) {
         api.setBaseUrl(ConfigurationReader.getProperty("fruitAPIBaseUrl"));
-        api.setEndPoint(customersByIdEndPoint.replace("{id}", useful_utils.defineValue(id)));
+        api.setEndPoint(customersByIdEndPoint.replace("{id}", useful_utils.defineValue(idPath)));
         api.Delete();
     }
 }

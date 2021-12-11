@@ -35,8 +35,13 @@ public class API_VendorsCreateUpdateDelete implements Util_stuff {
         int page = 0;
         while (page < pages) {
             api.GetByQueryParam("page", String.valueOf(++page));
-            JsonArray vendors = api.getResponseBody().get("vendors").getAsJsonArray();
+            JsonArray vendors = api.getResponseBody().getAsJsonArray("vendors");
             vendorsArray.getAsJsonArray("vendors").addAll(vendors);
+        }
+        for (int i = 0; i < vendorsArray.getAsJsonArray("vendors").size(); i++) {
+            vendorsArray.getAsJsonArray("vendors").get(i).getAsJsonObject().addProperty("vendorId",
+                    useful_utils.getVendorIdFromURL(vendorsArray.getAsJsonArray("vendors").get(i)
+                            .getAsJsonObject().get("vendor_url").getAsString()));
         }
         System.out.println("vendorsArray = " + vendorsArray);
         stg.savePayloadByName(name, vendorsArray);
@@ -46,7 +51,7 @@ public class API_VendorsCreateUpdateDelete implements Util_stuff {
     public void I_create_new_vendor_by_name_with_data(String name, Map<String, String> data) {
         JsonObject vendor = new JsonObject();
         for (String key : data.keySet()) {
-            vendor.addProperty(key, data.get(key));
+            vendor.addProperty(key, useful_utils.defineValue(data.get(key)));
         }
 
         api.setBaseUrl(ConfigurationReader.getProperty("fruitAPIBaseUrl"));
@@ -56,25 +61,25 @@ public class API_VendorsCreateUpdateDelete implements Util_stuff {
                 api.getResponseBody().get("vendor_url").getAsString());
 
         api.getResponseBody().addProperty("vendorId", vendorId);
-        stg.savePayloadByName(name, vendor);
+        stg.savePayloadByName(name, api.getResponseBody());
         System.out.println("vendorId = " + vendorId);
     }
 
-    @Then("I validate vendor by id {string} created")
-    public void I_validate_vendor_by_id_created(String expectedVendorId) {
-        Assert.assertTrue(expectedVendorId + " is not found! - FAIL!",
-                doesVendorIdExist(expectedVendorId));
-        System.out.println(expectedVendorId + " is fount! - PASS!");
+    @Then("I validate vendor by vendorId {string} created")
+    public void I_validate_vendor_by_id_created(String vendorIdPath) {
+        Assert.assertTrue(vendorIdPath + " is not found! - FAIL!",
+                doesVendorIdExist(vendorIdPath));
+        System.out.println(vendorIdPath + " is fount! - PASS!");
     }
 
-    @Then("I validate vendor by id {string} does not exist")
-    public void I_validate_vendor_by_id_does_not_exist(String expectedVendorId) {
-        Assert.assertFalse(expectedVendorId + " is found! - FAIL!",
-                doesVendorIdExist(expectedVendorId));
-        System.out.println(expectedVendorId + " is not fount! - PASS!");
+    @Then("I validate vendor by vendorId {string} does not exist")
+    public void I_validate_vendor_by_id_does_not_exist(String vendorIdPath) {
+        Assert.assertFalse(vendorIdPath + " is found! - FAIL!",
+                doesVendorIdExist(vendorIdPath));
+        System.out.println(vendorIdPath + " is not fount! - PASS!");
     }
 
-    public boolean doesVendorIdExist(String vendorId) {
+    public boolean doesVendorIdExist(String vendorIdPath) {
         api.setBaseUrl(ConfigurationReader.getProperty("fruitAPIBaseUrl"));
         api.setEndPoint(vendorsEndPoint);
         api.Get();
@@ -91,7 +96,7 @@ public class API_VendorsCreateUpdateDelete implements Util_stuff {
             for (int i = 0; i < vendors.size(); i++) {
                 String actualId = useful_utils.getVendorIdFromURL(
                         vendors.get(i).getAsJsonObject().get("vendor_url").getAsString());
-                if (actualId.equals(useful_utils.defineValue(vendorId))) {
+                if (actualId.equals(useful_utils.defineValue(vendorIdPath))) {
                     System.out.println("We found our id, it is " + actualId);
                     found = true;
                     break;
@@ -101,27 +106,28 @@ public class API_VendorsCreateUpdateDelete implements Util_stuff {
         return found;
     }
 
-    @When("I update vendor by name {string} by id {string} with data")
-    public void I_update_vendor_by_id_with_data(String name, String vendorId, Map<String, String> data) {
+    @When("I update vendor by vendorId {string} and save with name {string} with data")
+    public void I_update_vendor_by_id_and_save_with_name_with_data(String vendorIdPath, String name, Map<String, String> data) {
         JsonObject vendor = new JsonObject();
         for (String key : data.keySet()) {
             vendor.addProperty(key, data.get(key));
         }
+        String vendorId = useful_utils.defineValue(vendorIdPath);
         api.setBaseUrl(ConfigurationReader.getProperty("fruitAPIBaseUrl"));
-        api.setEndPoint(vendorsByIdEndPoint.replace("{id}", useful_utils.defineValue(vendorId)));
+        api.setEndPoint(vendorsByIdEndPoint.replace("{id}", vendorId));
         api.Patch(vendor);
 
         api.getResponseBody().addProperty("vendorId", vendorId);
         stg.savePayloadByName(name, api.getResponseBody());
     }
 
-    @Then("I validate vendor by id {string} created/updated with data")
-    public void I_validate_vendor_by_id_created_with_data(String vendorId, Map<String, String> data) {
-        I_validate_vendor_by_id_created(vendorId);
+    @Then("I validate vendor by vendorId {string} created/updated with data")
+    public void I_validate_vendor_by_id_created_with_data(String vendorIdPath, Map<String, String> data) {
+        I_validate_vendor_by_id_created(vendorIdPath);
         JsonArray vendors = api.getResponseBody().get("vendors").getAsJsonArray();
         for (int i = 0; i < vendors.size(); i++) {
             if (useful_utils.getVendorIdFromURL(vendors.get(i).getAsJsonObject().get("vendor_url").getAsString())
-                    .equals(useful_utils.defineValue(vendorId))) {
+                    .equals(useful_utils.defineValue(vendorIdPath))) {
                 for (String key : data.keySet()) {
                     Assert.assertEquals(key + " mismatch! - FAIL!",
                             useful_utils.defineValue(data.get(key)),
@@ -131,5 +137,23 @@ public class API_VendorsCreateUpdateDelete implements Util_stuff {
                 break;
             }
         }
+    }
+
+    @When("I get vendor by vendorId {string} and save by {string}")
+    public void I_get_vendor_by_id(String vendorIdPath, String name) {
+        api.setBaseUrl(ConfigurationReader.getProperty("fruitAPIBaseUrl"));
+        api.setEndPoint(vendorsByIdEndPoint.replace("{id}", useful_utils.defineValue(vendorIdPath)));
+        api.Get();
+
+        api.getResponseBody().addProperty("vendorId",
+                useful_utils.getVendorIdFromURL(api.getResponseBody().get("vendor_url").getAsString()));
+        stg.savePayloadByName(name, api.getResponseBody());
+    }
+
+    @When("I delete a vendor by vendorId {string}")
+    public void I_delete_a_vendor_by_vendorId(String vendorIdPath) {
+        api.setBaseUrl(ConfigurationReader.getProperty("fruitAPIBaseUrl"));
+        api.setEndPoint(vendorsByIdEndPoint.replace("{id}", useful_utils.defineValue(vendorIdPath)));
+        api.Delete();
     }
 }
