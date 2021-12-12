@@ -23,18 +23,19 @@ public class API_CustomerCreateUpdateDelete implements Util_stuff {
     public void I_created_new_customer_by_name_with_data(String name, Map<String, String> data) {
         JsonObject customer = new JsonObject();
         for (String key : data.keySet()) {
-            customer.addProperty(key, data.get(key));
+            customer.addProperty(key, useful_utils.defineValue(data.get(key)));
         }
 
         api.setBaseUrl(ConfigurationReader.getProperty("fruitAPIBaseUrl"));
         api.setEndPoint(customersEndPoint);
         api.Post(customer);
+        Assert.assertEquals("Unexpected status code!", 201, api.getResponse().getStatusCode());
         String id = useful_utils.getCustomerIdFromURL(
                 api.getResponseBody().get("customer_url").getAsString());
 
         api.getResponseBody().addProperty("id", id);
         stg.savePayloadByName(name, api.getResponseBody());
-        System.out.println("id = " + id);
+        System.out.println("Created ne customer by id = " + id);
     }
 
     @When("I get all customers and save payload by name {string}")
@@ -42,6 +43,7 @@ public class API_CustomerCreateUpdateDelete implements Util_stuff {
         api.setBaseUrl(ConfigurationReader.getProperty("fruitAPIBaseUrl"));
         api.setEndPoint(customersEndPoint);
         api.Get();
+        Assert.assertEquals("Unexpected status code!", 200, api.getResponse().getStatusCode());
 
         JsonObject customersArray = new JsonObject();
         customersArray.add("customers", new JsonArray());
@@ -53,6 +55,7 @@ public class API_CustomerCreateUpdateDelete implements Util_stuff {
         int page = 0;
         while (page < pages) {
             api.GetByQueryParam("page", String.valueOf(++page));
+            Assert.assertEquals("Unexpected status code!", 200, api.getResponse().getStatusCode());
             JsonArray customers = api.getResponseBody().get("customers").getAsJsonArray();
             customersArray.getAsJsonArray("customers").addAll(customers);
         }
@@ -69,6 +72,7 @@ public class API_CustomerCreateUpdateDelete implements Util_stuff {
     public void I_validate_customer_by_id_created(String idPath) {
         Assert.assertTrue(idPath + " is not found! - FAIL!",
                 doesCustomerIdExist(idPath));
+        Assert.assertEquals("Unexpected status code!", 200, api.getResponse().getStatusCode());
         System.out.println(idPath + " is fount! - PASS!");
     }
 
@@ -76,46 +80,33 @@ public class API_CustomerCreateUpdateDelete implements Util_stuff {
     public void I_validate_customer_by_id_does_not_exist(String idPath) {
         Assert.assertFalse(idPath + " is found! - FAIL!",
                 doesCustomerIdExist(idPath));
+        Assert.assertEquals("Unexpected status code!", 404, api.getResponse().getStatusCode());
         System.out.println(idPath + " is not fount! - PASS!");
     }
 
-    public boolean doesCustomerIdExist(String idPath) {
+    public JsonObject I_get_customer_by_id(String idPath) {
         api.setBaseUrl(ConfigurationReader.getProperty("fruitAPIBaseUrl"));
-        api.setEndPoint(customersEndPoint);
+        api.setEndPoint(customersByIdEndPoint.replace("{id}", useful_utils.defineValue(idPath)));
         api.Get();
 
-        int pages = useful_utils.getNumberOfPagedBasedOnCountAndLimit(
-                api.getResponseBody().getAsJsonObject("meta").get("count").getAsString(),
-                api.getResponseBody().getAsJsonObject("meta").get("limit").getAsString()
-        );
-        boolean found = false;
-        int page = 0;
-        while (page < pages) {
-            api.GetByQueryParam("page", String.valueOf(++page));
-            JsonArray customers = api.getResponseBody().get("customers").getAsJsonArray();
-            for (int i = 0; i < customers.size(); i++) {
-                String actualId = useful_utils.getCustomerIdFromURL(
-                        customers.get(i).getAsJsonObject().get("customer_url").getAsString());
-                if (actualId.equals(useful_utils.defineValue(idPath))) {
-                    System.out.println("We found our id, it is " + actualId);
-                    found = true;
-                    break;
-                }
-            }
-        }
-        return found;
+        return api.getResponseBody();
+    }
+
+    public boolean doesCustomerIdExist(String idPath) {
+        return !I_get_customer_by_id(idPath).has("error");
     }
 
     @When("I update customer by id {string} and save with name {string} with data")
-    public void I_update_customer_by_id_and_save_with_name_with_data(String name, String idPath, Map<String, String> data) {
+    public void I_update_customer_by_id_and_save_with_name_with_data(String idPath, String name, Map<String, String> data) {
         JsonObject customer = new JsonObject();
         for (String key : data.keySet()) {
-            customer.addProperty(key, data.get(key));
+            customer.addProperty(key, useful_utils.defineValue(data.get(key)));
         }
         String id = useful_utils.defineValue(idPath);
         api.setBaseUrl(ConfigurationReader.getProperty("fruitAPIBaseUrl"));
         api.setEndPoint(customersByIdEndPoint.replace("{id}", id));
         api.Patch(customer);
+        Assert.assertEquals("Unexpected status code!", 200, api.getResponse().getStatusCode());
 
         api.getResponseBody().addProperty("id", id);
         stg.savePayloadByName(name, api.getResponseBody());
@@ -124,26 +115,18 @@ public class API_CustomerCreateUpdateDelete implements Util_stuff {
     @Then("I validate customer by id {string} created/updated with data")
     public void I_validate_customer_by_id_created_with_data(String idPath, Map<String, String> data) {
         I_validate_customer_by_id_created(idPath);
-        JsonArray customers = api.getResponseBody().get("customers").getAsJsonArray();
-        for (int i = 0; i < customers.size(); i++) {
-            if (useful_utils.getCustomerIdFromURL(customers.get(i).getAsJsonObject().get("customer_url").getAsString())
-                    .equals(useful_utils.defineValue(idPath))) {
-                for (String key : data.keySet()) {
-                    Assert.assertEquals(key + " mismatch! - FAIL!",
-                            useful_utils.defineValue(data.get(key)),
-                            customers.get(i).getAsJsonObject().get(key).getAsString());
-                    System.out.println(key + " matches! - PASS!");
-                }
-                break;
-            }
+        for (String key : data.keySet()) {
+            Assert.assertEquals(key + " mismatch! - FAIL!",
+                    useful_utils.defineValue(data.get(key)),
+                    api.getResponseBody().get(key).getAsString());
+            System.out.println(key + " matches! - PASS!");
         }
     }
 
-    @When("I get customer by id {string} and save by {string}")
-    public void I_get_customer_by_id(String idPath, String name) {
-        api.setBaseUrl(ConfigurationReader.getProperty("fruitAPIBaseUrl"));
-        api.setEndPoint(customersByIdEndPoint.replace("{id}", useful_utils.defineValue(idPath)));
-        api.Get();
+    @When("I get customer by id {string} and save by name {string}")
+    public void I_get_customer_by_id_and_save_by_name(String idPath, String name) {
+        I_get_customer_by_id(idPath);
+        Assert.assertEquals("Unexpected status code!", 200, api.getResponse().getStatusCode());
 
         api.getResponseBody().addProperty("id",
                 useful_utils.getCustomerIdFromURL(api.getResponseBody().get("orders_url").getAsString()));
@@ -155,5 +138,6 @@ public class API_CustomerCreateUpdateDelete implements Util_stuff {
         api.setBaseUrl(ConfigurationReader.getProperty("fruitAPIBaseUrl"));
         api.setEndPoint(customersByIdEndPoint.replace("{id}", useful_utils.defineValue(idPath)));
         api.Delete();
+        Assert.assertEquals("Unexpected status code!", 200, api.getResponse().getStatusCode());
     }
 }
