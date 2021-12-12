@@ -7,15 +7,15 @@ Feature: Creating, Updating, deleting test data
   @1001
   Scenario: Customer Create, Update, Delete
     Given I created new customer by name "1001-1" with data
-      | firstname | firstname:: |
-      | lastname  | lastname::  |
+      | firstName | firstName:: |
+      | lastName  | lastName::  |
     Then I validate customer by id "1001-1:id" created
     When I update customer by id "1001-1:id" and save with name "1001-2" with data
-      | firstname | firstname:: |
-      | lastname  | lastname::  |
+      | firstName | firstName:: |
+      | lastName  | lastName::  |
     Then I validate customer by id "1001-1:id" updated with data
-      | firstname | 1001-2:firstname |
-      | lastname  | 1001-2:lastname  |
+      | firstName | 1001-2:firstName |
+      | lastName  | 1001-2:lastName  |
     When I delete a customer by id "1001-1:id"
     Then I validate customer by id "1001-1:id" does not exist
 

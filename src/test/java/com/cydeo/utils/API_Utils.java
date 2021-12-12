@@ -1,11 +1,9 @@
 package com.cydeo.utils;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
-import org.junit.Assert;
 
 import static io.restassured.RestAssured.*;
 
@@ -15,8 +13,9 @@ public class API_Utils {
 
     private String baseUrl = null;
     private String endPoint = null;
-    private JsonObject responseBody = null;
     private Response response = null;
+    private String responseBodyAsString = null;
+    private JsonObject responseBody = null;
 
     public void setBaseUrl(String baseUrl) {
         this.baseUrl = baseUrl;
@@ -40,7 +39,8 @@ public class API_Utils {
                 .accept(ContentType.JSON).
                         when()
                 .get(baseUrl + endPoint);
-        responseBody = gson.fromJson(response.getBody().asString(), JsonObject.class);
+        responseBodyAsString = response.getBody().asPrettyString();
+        responseBody = gson.fromJson(responseBodyAsString, JsonObject.class);
     }
 
     public void GetByQueryParam(String key, String value) {
@@ -50,7 +50,8 @@ public class API_Utils {
                 .queryParam(key, value).
                         when()
                 .get(baseUrl + endPoint);
-        responseBody = gson.fromJson(response.getBody().asString(), JsonObject.class);
+        responseBodyAsString = response.getBody().asPrettyString();
+        responseBody = gson.fromJson(responseBodyAsString, JsonObject.class);
     }
 
     public void Post() {
@@ -59,7 +60,8 @@ public class API_Utils {
                 .accept(ContentType.JSON).
                         when()
                 .post(baseUrl + endPoint);
-        responseBody = gson.fromJson(response.getBody().asString(), JsonObject.class);
+        responseBodyAsString = response.getBody().asPrettyString();
+        responseBody = gson.fromJson(responseBodyAsString, JsonObject.class);
     }
 
     public void Post(JsonObject payload) {
@@ -69,7 +71,19 @@ public class API_Utils {
                 .body(payload.toString()).
                         when()
                 .post(baseUrl + endPoint);
-        responseBody = gson.fromJson(response.getBody().asString(), JsonObject.class);
+        responseBodyAsString = response.getBody().asPrettyString();
+        responseBody = gson.fromJson(responseBodyAsString, JsonObject.class);
+    }
+
+    public void Put(JsonObject payload) {
+        response = given()
+                .contentType(ContentType.JSON)
+                .accept(ContentType.JSON)
+                .body(payload.toString()).
+                        when()
+                .put(baseUrl + endPoint);
+        responseBodyAsString = response.getBody().asPrettyString();
+        responseBody = gson.fromJson(responseBodyAsString, JsonObject.class);
     }
 
     public void Patch(JsonObject payload) {
@@ -79,7 +93,8 @@ public class API_Utils {
                 .body(payload.toString()).
                         when()
                 .patch(baseUrl + endPoint);
-        responseBody = gson.fromJson(response.getBody().asString(), JsonObject.class);
+        responseBodyAsString = response.getBody().asPrettyString();
+        responseBody = gson.fromJson(responseBodyAsString, JsonObject.class);
     }
 
     public void Delete() {

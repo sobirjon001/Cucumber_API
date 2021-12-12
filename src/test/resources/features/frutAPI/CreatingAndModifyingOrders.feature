@@ -7,8 +7,8 @@ Feature: Orders Create, Update, delete
   Scenario: Orders Create, Update, Delete
     Given I get all orders and save payload by name "2001-1"
     Given I created new customer by name "2001-customer" with data
-      | firstname | firstname:: |
-      | lastname  | lastname::  |
+      | firstName | firstName:: |
+      | lastName  | lastName::  |
     When I create new order for customer by id "2001-customer:id" and save payload by name "2001-order"
     Then I validate order by orderId "2001-order:orderId" created with data
       | createdAt    | today::                    |
@@ -25,6 +25,6 @@ Feature: Orders Create, Update, delete
   @2002
   Scenario: Add and remove items to order
     Given I created new customer by name "2002-customer" with data
-      | firstname | firstname:: |
-      | lastname  | lastname::  |
+      | firstName | firstName:: |
+      | lastName  | lastName::  |
     When I create new order for customer by id "2002-customer:id" and save payload by name "2002-order"

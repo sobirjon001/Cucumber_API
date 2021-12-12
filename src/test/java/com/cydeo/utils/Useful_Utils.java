@@ -8,6 +8,7 @@ import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.stream.Collectors;
 
 public class Useful_Utils implements Util_stuff {
@@ -19,14 +20,24 @@ public class Useful_Utils implements Util_stuff {
             switch (input.substring(0, input.indexOf("::"))) {
                 case "null":
                     return null;
-                case "firstname":
+                case "firstName":
                     return faker.name().firstName();
-                case "lastname":
+                case "lastName":
                     return faker.name().lastName();
+                case "username":
+                    return faker.name().username();
+                case "email":
+                    return faker.internet().emailAddress();
+                case "password":
+                    return faker.internet().password();
+                case "phone":
+                    return faker.phoneNumber().cellPhone();
                 case "vendorName":
                     return faker.company().name();
                 case "today":
                     return LocalDate.now(ZoneOffset.UTC).format(df);
+                case "uiid":
+                    return String.valueOf(new Random().hashCode());
             }
         } else if (input.contains(":")) {
             return stg.getPayloadByName(input.split(":")[0])
