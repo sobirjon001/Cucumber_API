@@ -3,22 +3,30 @@ package com.cydeo.utils;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 
+import java.time.LocalDate;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class Useful_Utils implements Util_stuff {
 
+    DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     public String defineValue(String input) {
         if (input.contains("::")) {
             switch (input.substring(0, input.indexOf("::"))) {
+                case "null":
+                    return null;
                 case "firstname":
                     return faker.name().firstName();
                 case "lastname":
                     return faker.name().lastName();
                 case "vendorName":
                     return faker.company().name();
+                case "today":
+                    return LocalDate.now(ZoneOffset.UTC).format(df);
             }
         } else if (input.contains(":")) {
             return stg.getPayloadByName(input.split(":")[0])
@@ -68,6 +76,23 @@ public class Useful_Utils implements Util_stuff {
 
     public String getCategoryIdFromURL(String category_url) {
         return category_url.replace("/shop/categories/", "");
+    }
+
+    public String getOrderIdFromURL(String order_url) {
+        order_url = order_url.replace("/shop/orders/", "");
+        StringBuilder orderId = new StringBuilder();
+        for (Character character : order_url.toCharArray()) {
+            if (Character.isDigit(character)) {
+                orderId.append(character);
+            } else {
+                return orderId.toString();
+            }
+        }
+        return orderId.toString();
+    }
+
+    public String getItemIdFromOrderURL(String order_url) {
+        return order_url.substring(order_url.lastIndexOf("/") + 1);
     }
 
     public int getNumberOfPagedBasedOnCountAndLimit(int count, int limit) {

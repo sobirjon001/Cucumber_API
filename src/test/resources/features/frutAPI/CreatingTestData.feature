@@ -1,3 +1,4 @@
+@all
 Feature: Creating, Updating, deleting test data
 
   This feature will exercise creating, updating, deleting data.
@@ -48,7 +49,7 @@ Feature: Creating, Updating, deleting test data
     Then I validate products payload by name "<name>" contains coma separated list "<products>"
     Examples: Products list by given category
       | name   | category | products                                                   |
-      | 1004-1 | Fruits   | Bananas, Oranges, Pineapples, Cranberries, Raspberries     |
+      | 1004-1 | Fruits   | Oranges, Pineapples, Cranberries, Raspberries     |
       | 1004-2 | Dried    | Dried Pineapples                                           |
       | 1004-3 | Fresh    | Mango fresh                                                |
       | 1004-4 | Exotic   | Dragon Fruit, Figs, Horn Cucumber, Kaki, Lychee, Rambutan  |

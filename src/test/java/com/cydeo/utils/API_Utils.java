@@ -16,7 +16,7 @@ public class API_Utils {
     private String baseUrl = null;
     private String endPoint = null;
     private JsonObject responseBody = null;
-    private JsonArray responseBodies = null;
+    private Response response = null;
 
     public void setBaseUrl(String baseUrl) {
         this.baseUrl = baseUrl;
@@ -30,60 +30,63 @@ public class API_Utils {
         return responseBody;
     }
 
-    public void Post(JsonObject payload) {
-        Response response =
-                given()
-                        .contentType(ContentType.JSON)
-                        .accept(ContentType.JSON)
-                        .body(payload.toString()).log().all().
-                        when()
-                        .post(baseUrl + endPoint);
-        Assert.assertEquals("Unexpected status code!", 201, response.getStatusCode());
-        responseBody = gson.fromJson(response.getBody().asString(), JsonObject.class);
-    }
-
-    public void Patch(JsonObject payload) {
-        Response response =
-                given()
-                        .contentType(ContentType.JSON)
-                        .accept(ContentType.JSON)
-                        .body(payload.toString()).log().all().
-                        when()
-                        .patch(baseUrl + endPoint);
-        Assert.assertEquals("Unexpected status code!",200, response.getStatusCode());
-        responseBody = gson.fromJson(response.getBody().asString(), JsonObject.class);
+    public Response getResponse() {
+        return response;
     }
 
     public void Get() {
-        Response response =
-                given()
-                        .contentType(ContentType.JSON)
-                        .accept(ContentType.JSON).log().all().
+        response = given()
+                .contentType(ContentType.JSON)
+                .accept(ContentType.JSON).
                         when()
-                        .get(baseUrl + endPoint);
-        Assert.assertEquals("Unexpected status code!", 200, response.getStatusCode());
+                .get(baseUrl + endPoint);
         responseBody = gson.fromJson(response.getBody().asString(), JsonObject.class);
     }
 
     public void GetByQueryParam(String key, String value) {
-        Response response =
-                given()
-                        .contentType(ContentType.JSON)
-                        .accept(ContentType.JSON)
-                        .queryParam(key, value).
+        response = given()
+                .contentType(ContentType.JSON)
+                .accept(ContentType.JSON)
+                .queryParam(key, value).
                         when()
-                        .get(baseUrl + endPoint);
-        Assert.assertEquals("Unexpected status code!", 200, response.getStatusCode());
+                .get(baseUrl + endPoint);
+        responseBody = gson.fromJson(response.getBody().asString(), JsonObject.class);
+    }
+
+    public void Post() {
+        response = given()
+                .contentType(ContentType.JSON)
+                .accept(ContentType.JSON).
+                        when()
+                .post(baseUrl + endPoint);
+        responseBody = gson.fromJson(response.getBody().asString(), JsonObject.class);
+    }
+
+    public void Post(JsonObject payload) {
+        response = given()
+                .contentType(ContentType.JSON)
+                .accept(ContentType.JSON)
+                .body(payload.toString()).
+                        when()
+                .post(baseUrl + endPoint);
+        responseBody = gson.fromJson(response.getBody().asString(), JsonObject.class);
+    }
+
+    public void Patch(JsonObject payload) {
+        response = given()
+                .contentType(ContentType.JSON)
+                .accept(ContentType.JSON)
+                .body(payload.toString()).
+                        when()
+                .patch(baseUrl + endPoint);
         responseBody = gson.fromJson(response.getBody().asString(), JsonObject.class);
     }
 
     public void Delete() {
-        Response response =
-                given()
-                        .contentType(ContentType.JSON)
-                        .accept(ContentType.JSON).
+        response = given()
+                .contentType(ContentType.JSON)
+                .accept(ContentType.JSON).
                         when()
-                        .delete(baseUrl + endPoint);
-        Assert.assertEquals("Unexpected status code!", 200, response.getStatusCode());
+                .delete(baseUrl + endPoint);
     }
 }

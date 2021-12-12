@@ -17,13 +17,14 @@ public class API_VendorsCreateUpdateDelete implements Util_stuff {
     Useful_Utils useful_utils = new Useful_Utils();
 
     final String vendorsEndPoint = "/vendors/";
-    final String vendorsByIdEndPoint = "/vendors/{id}";
+    final String vendorsByVendorIdEndPoint = "/vendors/{vendorId}";
 
     @Given("I get all vendors and save payload by name {string}")
     public void I_get_all_vendors_and_save_payload_by_name(String name) {
         api.setBaseUrl(ConfigurationReader.getProperty("fruitAPIBaseUrl"));
         api.setEndPoint(vendorsEndPoint);
         api.Get();
+        Assert.assertEquals("Unexpected status code!", 200, api.getResponse().getStatusCode());
 
         JsonObject vendorsArray = new JsonObject();
         vendorsArray.add("vendors", new JsonArray());
@@ -35,6 +36,7 @@ public class API_VendorsCreateUpdateDelete implements Util_stuff {
         int page = 0;
         while (page < pages) {
             api.GetByQueryParam("page", String.valueOf(++page));
+            Assert.assertEquals("Unexpected status code!", 200, api.getResponse().getStatusCode());
             JsonArray vendors = api.getResponseBody().getAsJsonArray("vendors");
             vendorsArray.getAsJsonArray("vendors").addAll(vendors);
         }
@@ -57,6 +59,7 @@ public class API_VendorsCreateUpdateDelete implements Util_stuff {
         api.setBaseUrl(ConfigurationReader.getProperty("fruitAPIBaseUrl"));
         api.setEndPoint(vendorsEndPoint);
         api.Post(vendor);
+        Assert.assertEquals("Unexpected status code!", 201, api.getResponse().getStatusCode());
         String vendorId = useful_utils.getVendorIdFromURL(
                 api.getResponseBody().get("vendor_url").getAsString());
 
@@ -65,57 +68,46 @@ public class API_VendorsCreateUpdateDelete implements Util_stuff {
         System.out.println("vendorId = " + vendorId);
     }
 
+    public JsonObject getVendorByVendorId(String vendorIdPath) {
+        api.setBaseUrl(ConfigurationReader.getProperty("fruitAPIBaseUrl"));
+        api.setEndPoint(vendorsByVendorIdEndPoint.replace("{vendorId}",
+                useful_utils.defineValue(vendorIdPath)));
+        api.Get();
+
+        return api.getResponseBody();
+    }
+
+    public boolean doesVendorByVendorIdExist(String vendorIdPath) {
+        return !getVendorByVendorId(vendorIdPath).has("error");
+    }
+
     @Then("I validate vendor by vendorId {string} created")
     public void I_validate_vendor_by_id_created(String vendorIdPath) {
         Assert.assertTrue(vendorIdPath + " is not found! - FAIL!",
-                doesVendorIdExist(vendorIdPath));
+                doesVendorByVendorIdExist(vendorIdPath));
+        Assert.assertEquals("Unexpected status code!", 200, api.getResponse().getStatusCode());
         System.out.println(vendorIdPath + " is fount! - PASS!");
     }
 
     @Then("I validate vendor by vendorId {string} does not exist")
     public void I_validate_vendor_by_id_does_not_exist(String vendorIdPath) {
         Assert.assertFalse(vendorIdPath + " is found! - FAIL!",
-                doesVendorIdExist(vendorIdPath));
+                doesVendorByVendorIdExist(vendorIdPath));
+        Assert.assertEquals("Unexpected status code!", 404, api.getResponse().getStatusCode());
         System.out.println(vendorIdPath + " is not fount! - PASS!");
-    }
-
-    public boolean doesVendorIdExist(String vendorIdPath) {
-        api.setBaseUrl(ConfigurationReader.getProperty("fruitAPIBaseUrl"));
-        api.setEndPoint(vendorsEndPoint);
-        api.Get();
-
-        int pages = useful_utils.getNumberOfPagedBasedOnCountAndLimit(
-                api.getResponseBody().getAsJsonObject("meta").get("count").getAsString(),
-                api.getResponseBody().getAsJsonObject("meta").get("limit").getAsString()
-        );
-        boolean found = false;
-        int page = 0;
-        while (page < pages) {
-            api.GetByQueryParam("page", String.valueOf(++page));
-            JsonArray vendors = api.getResponseBody().get("vendors").getAsJsonArray();
-            for (int i = 0; i < vendors.size(); i++) {
-                String actualId = useful_utils.getVendorIdFromURL(
-                        vendors.get(i).getAsJsonObject().get("vendor_url").getAsString());
-                if (actualId.equals(useful_utils.defineValue(vendorIdPath))) {
-                    System.out.println("We found our id, it is " + actualId);
-                    found = true;
-                    break;
-                }
-            }
-        }
-        return found;
     }
 
     @When("I update vendor by vendorId {string} and save with name {string} with data")
     public void I_update_vendor_by_id_and_save_with_name_with_data(String vendorIdPath, String name, Map<String, String> data) {
         JsonObject vendor = new JsonObject();
         for (String key : data.keySet()) {
-            vendor.addProperty(key, data.get(key));
+            vendor.addProperty(key, useful_utils.defineValue(data.get(key)));
         }
         String vendorId = useful_utils.defineValue(vendorIdPath);
         api.setBaseUrl(ConfigurationReader.getProperty("fruitAPIBaseUrl"));
-        api.setEndPoint(vendorsByIdEndPoint.replace("{id}", vendorId));
+        api.setEndPoint(vendorsByVendorIdEndPoint.replace("{vendorId}", vendorId));
         api.Patch(vendor);
+        Assert.assertEquals("Unexpected status code!", 200, api.getResponse().getStatusCode());
 
         api.getResponseBody().addProperty("vendorId", vendorId);
         stg.savePayloadByName(name, api.getResponseBody());
@@ -123,27 +115,20 @@ public class API_VendorsCreateUpdateDelete implements Util_stuff {
 
     @Then("I validate vendor by vendorId {string} created/updated with data")
     public void I_validate_vendor_by_id_created_with_data(String vendorIdPath, Map<String, String> data) {
-        I_validate_vendor_by_id_created(vendorIdPath);
-        JsonArray vendors = api.getResponseBody().get("vendors").getAsJsonArray();
-        for (int i = 0; i < vendors.size(); i++) {
-            if (useful_utils.getVendorIdFromURL(vendors.get(i).getAsJsonObject().get("vendor_url").getAsString())
-                    .equals(useful_utils.defineValue(vendorIdPath))) {
-                for (String key : data.keySet()) {
-                    Assert.assertEquals(key + " mismatch! - FAIL!",
-                            useful_utils.defineValue(data.get(key)),
-                            vendors.get(i).getAsJsonObject().get(key).getAsString());
-                    System.out.println(key + " matches! - PASS!");
-                }
-                break;
-            }
+        JsonObject vendor = getVendorByVendorId(vendorIdPath);
+        Assert.assertEquals("Unexpected status code!", 200, api.getResponse().getStatusCode());
+        for (String key : data.keySet()) {
+            Assert.assertEquals(key + " mismatch! - FAIL!",
+                    useful_utils.defineValue(data.get(key)),
+                    vendor.get(key).getAsString());
+            System.out.println(key + " matches! - PASS!");
         }
     }
 
     @When("I get vendor by vendorId {string} and save by {string}")
     public void I_get_vendor_by_id(String vendorIdPath, String name) {
-        api.setBaseUrl(ConfigurationReader.getProperty("fruitAPIBaseUrl"));
-        api.setEndPoint(vendorsByIdEndPoint.replace("{id}", useful_utils.defineValue(vendorIdPath)));
-        api.Get();
+        getVendorByVendorId(vendorIdPath);
+        Assert.assertEquals("Unexpected status code!", 200, api.getResponse().getStatusCode());
 
         api.getResponseBody().addProperty("vendorId",
                 useful_utils.getVendorIdFromURL(api.getResponseBody().get("vendor_url").getAsString()));
@@ -153,7 +138,8 @@ public class API_VendorsCreateUpdateDelete implements Util_stuff {
     @When("I delete a vendor by vendorId {string}")
     public void I_delete_a_vendor_by_vendorId(String vendorIdPath) {
         api.setBaseUrl(ConfigurationReader.getProperty("fruitAPIBaseUrl"));
-        api.setEndPoint(vendorsByIdEndPoint.replace("{id}", useful_utils.defineValue(vendorIdPath)));
+        api.setEndPoint(vendorsByVendorIdEndPoint.replace("{vendorId}", useful_utils.defineValue(vendorIdPath)));
         api.Delete();
+        Assert.assertEquals("Unexpected status code!", 200, api.getResponse().getStatusCode());
     }
 }
