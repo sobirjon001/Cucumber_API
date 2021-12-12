@@ -30,11 +30,11 @@
                 <version>3.0.0-M5</version>
                 <configuration>
                     <parallel>methods</parallel>
-                    <threadCount>4</threadCount>
+                    <threadCount>1</threadCount>
                     <perCoreThreadCount>false</perCoreThreadCount>
                     <testFailureIgnore>true</testFailureIgnore>
                     <includes>
-                        <include>**/SystemTestRunner.java</include>
+                        <include>**/CukesRunner.java</include>
                     </includes>
                 </configuration>
             </plugin>
