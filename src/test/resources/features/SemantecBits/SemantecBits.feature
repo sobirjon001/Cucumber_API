@@ -51,4 +51,10 @@ Feature: Some of interview practices for Semantic Bits
       | description    | 3002-1:description    |
       | date_resolved  | null                  |
       | provider_types | 3002-1[provider_types |
+
+    @3003
+    Scenario: Exercise Semantic Bits website
+      Given I open Semantic Bits website
+      When I select "Software Development" inside "Expertise" module
+      Then I verify I'm in "Software Development" page
       

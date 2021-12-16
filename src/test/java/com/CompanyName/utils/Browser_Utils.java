@@ -2,6 +2,7 @@ package com.CompanyName.utils;
 
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.support.ui.WebDriverWait;
@@ -13,10 +14,13 @@ import java.util.stream.Collectors;
 public class Browser_Utils {
 
     WebDriverWait wait = new WebDriverWait(Driver.getDriver(), Duration.ofSeconds(10));
+    Actions actions = new Actions(Driver.getDriver());
 
     public String getURL() {
         return Driver.getDriver().getCurrentUrl();
     }
+
+    public String getTitle() { return Driver.getDriver().getTitle(); }
 
     public void waitForVisibilityOf(WebElement webElement) {
         wait.until(ExpectedConditions.visibilityOf(webElement));
@@ -68,5 +72,10 @@ public class Browser_Utils {
         webElement.clear();
         webElement.sendKeys(Keys.chord(Keys.CONTROL, "A"));
         webElement.sendKeys(value);
+    }
+
+    public void hover(WebElement webElement) {
+        waitForVisibilityOf(webElement);
+        actions.moveToElement(webElement).perform();
     }
 }
