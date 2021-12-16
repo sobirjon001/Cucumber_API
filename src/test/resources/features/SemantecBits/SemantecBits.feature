@@ -1,7 +1,7 @@
 @SemanticBits
 Feature: Some of interview practices for Semantic Bits
 
-  @3001
+  @3001 @API
   Scenario: Data manipulations
     Given I create new issue and save payload by name "3001-1" with data
       | snowids        | 123, 456, 789                         |
