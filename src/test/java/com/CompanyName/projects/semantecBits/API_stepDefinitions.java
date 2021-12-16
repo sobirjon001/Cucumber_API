@@ -38,6 +38,7 @@ public class API_stepDefinitions implements Util_stuff {
                     json.addProperty(key, data.get(key));
             }
         }
+        System.out.println("Created json object is \n" + json.toString());
         return json;
     }
 
@@ -48,6 +49,7 @@ public class API_stepDefinitions implements Util_stuff {
         api.Post(updateOrAddValuesToGivenJsonObgect(new JsonObject(), data));
         Assert.assertEquals("Unexpected status code!", 200, api.getResponse().getStatusCode());
 
+        System.out.println("id = " + api.getResponseArray().get(0).getAsJsonObject().get("id").getAsString());
         stg.savePayloadByName(name, api.getResponseArray().get(0).getAsJsonObject());
     }
 
@@ -69,15 +71,18 @@ public class API_stepDefinitions implements Util_stuff {
                     Assert.assertEquals(key + " mismatch! - FAIL!",
                             useful_utils.defineValue(data.get(key)),
                             jsonToTest.get(key).getAsJsonArray().toString());
+                    System.out.println(key + "actual date/time is " + jsonToTest.get(key).getAsJsonArray().toString());
                     break;
                 default:
                     if (data.get(key).equals("null")) {
                         Assert.assertTrue(key + " is not null! - FAIL!",
                                 jsonToTest.get(key).isJsonNull());
+                        System.out.println(key + " actual value is null");
                     } else {
                         Assert.assertEquals(key + " mismatch! - FAIL!",
                                 useful_utils.defineValue(data.get(key)),
                                 jsonToTest.get(key).getAsString());
+                        System.out.println(key + " actual value is " + jsonToTest.get(key).getAsString());
                     }
             }
         }
