@@ -57,4 +57,10 @@ Feature: Some of interview practices for Semantic Bits
       Given I open Semantic Bits website
       When I select "Software Development" inside "Expertise" module
       Then I verify I'm in "Software Development" page
+
+    @3003
+    Scenario: Exercise Semantic Bits website
+      Given I open Semantic Bits website
+      When I select "Software Development" inside "Expertise" module
+      Then I verify I'm in "Cloud Services" page
       
