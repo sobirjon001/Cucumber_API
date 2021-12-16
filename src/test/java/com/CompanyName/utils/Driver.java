@@ -24,8 +24,8 @@ public class Driver {
             switch (browser) {
                 case "remote-chrome":
                     try {
-                        URL url = new URL("http://host.docker.internal:4444/wd/hub");
-//                        URL url = new URL("http://localhost:4444/wd/hub");
+//                        URL url = new URL("http://host.docker.internal:4444/wd/hub");
+                        URL url = new URL("http://localhost:4444/wd/hub");
                         DesiredCapabilities desiredCapabilities = new DesiredCapabilities();
                         desiredCapabilities.setBrowserName("chrome");
                         driver = new RemoteWebDriver(url, desiredCapabilities);
