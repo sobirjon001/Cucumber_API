@@ -1,4 +1,4 @@
-package com.cydeo.runners;
+package com.CompanyName.runners;
 
 
 import io.cucumber.junit.Cucumber;
@@ -13,7 +13,7 @@ import org.junit.runner.RunWith;
                 "json:target/cucumber-report.json"
         },
         features = "src/test/resources/features",
-        glue = "com/cydeo/projects",
+        glue = "com/CompanyName/projects",
         dryRun = false,
         tags = "@all"
 )

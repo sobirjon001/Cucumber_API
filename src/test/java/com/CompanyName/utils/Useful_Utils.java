@@ -1,4 +1,4 @@
-package com.cydeo.utils;
+package com.CompanyName.utils;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -36,12 +36,21 @@ public class Useful_Utils implements Util_stuff {
                     return faker.company().name();
                 case "today":
                     return LocalDate.now(ZoneOffset.UTC).format(df);
+                case "firstDayOfMonth":
+                    return LocalDate.now(ZoneOffset.UTC).withDayOfMonth(1).format(df);
+                case "lastDayOfMonth":
+                    return LocalDate.now(ZoneOffset.UTC).withDayOfMonth(
+                            LocalDate.now(ZoneOffset.UTC).lengthOfMonth()
+                    ).format(df);
                 case "uiid":
                     return String.valueOf(new Random().hashCode());
             }
         } else if (input.contains(":")) {
             return stg.getPayloadByName(input.split(":")[0])
                     .get(input.split(":")[1]).getAsString();
+        } else if (input.contains("[")) {
+            return stg.getPayloadByName(input.split("\\[")[0])
+                    .get(input.split("\\[")[1]).getAsJsonArray().toString();
         }
         return input;
     }

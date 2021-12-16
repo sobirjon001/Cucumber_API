@@ -1,9 +1,6 @@
-package com.cydeo.utils;
+package com.CompanyName.utils;
 
 import com.github.javafaker.Faker;
-
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 
 public interface Util_stuff {
 

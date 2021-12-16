@@ -1,8 +1,8 @@
-package com.cydeo.projects.petstore;
+package com.CompanyName.projects.petstore;
 
-import com.cydeo.utils.ConfigurationReader;
-import com.cydeo.utils.Useful_Utils;
-import com.cydeo.utils.Util_stuff;
+import com.CompanyName.utils.ConfigurationReader;
+import com.CompanyName.utils.Useful_Utils;
+import com.CompanyName.utils.Util_stuff;
 import com.google.gson.JsonObject;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;

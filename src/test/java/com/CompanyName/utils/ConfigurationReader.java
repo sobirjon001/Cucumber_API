@@ -1,4 +1,4 @@
-package com.cydeo.utils;
+package com.CompanyName.utils;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
