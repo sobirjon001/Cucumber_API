@@ -36,7 +36,19 @@ public class WEB_stepDefinitions extends Browser_Utils implements Util_stuff {
                 Assert.assertEquals("This is not " + expectedPage + " page! - FAIL!",
                         "Cloud – SemanticBits", getTitle());
                 break;
+            case "Our Team":
+                Assert.assertEquals("This is not " + expectedPage + " page! - FAIL!",
+                        "Our Team – SemanticBits", getTitle());
+                break;
         }
         System.out.println("Current page is as expected, it is " + getTitle());
+    }
+
+    @Then("I verify Name {string} is appeared {int} times")
+    public void I_verify_Name_is_appeared_times(String name, int count) {
+        Driver.getDriver().switchTo().frame("advanced_iframe");
+        Assert.assertEquals("Count by name " + name + " in not equal to " + count,
+                count, page.getAllElementsByContainedText(name).size());
+        System.out.println("Expected count by name " + name + " is Correct! it is " + count);
     }
 }

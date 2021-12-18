@@ -1,5 +1,6 @@
 package com.CompanyName.utils;
 
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
@@ -15,6 +16,7 @@ public class Browser_Utils {
 
     WebDriverWait wait = new WebDriverWait(Driver.getDriver(), Duration.ofSeconds(10));
     Actions actions = new Actions(Driver.getDriver());
+    JavascriptExecutor js = (JavascriptExecutor) Driver.getDriver();
 
     public String getURL() {
         return Driver.getDriver().getCurrentUrl();
@@ -77,5 +79,15 @@ public class Browser_Utils {
     public void hover(WebElement webElement) {
         waitForVisibilityOf(webElement);
         actions.moveToElement(webElement).perform();
+    }
+
+    public void scrollDown() {
+        js.executeScript("window.scrollBy(0,250)", "");
+    }
+
+    public void waitFor(int seconds) {
+        try {
+            Thread.sleep(1000L * seconds);
+        } catch (Exception e) {}
     }
 }
