@@ -1,0 +1,104 @@
+# To execute this docker-compose yml file use `docker-compose -f jen-sel4.yml up`
+# Add the `-d` flag at the end for detached execution
+# To stop the execution, hit Ctrl+C, and then `docker-compose -f jen-sel4.yml down`
+
+# documentation https://github.com/SeleniumHQ/docker-selenium
+
+# VNC client:
+# Port 5900 to connect to the Chrome container
+# Port 5901 to connect to the Edge container
+# Port 5902 to connect to the Firefox container
+# Port 5903 to connect to the Opera container
+
+
+
+# Using your browser (no VNC client is needed)
+# http://localhost:7900/ to connect to the Chrome container
+# http://localhost:7901/ to connect to the Edge container
+# http://localhost:7902/ to connect to the Firefox container
+# http://localhost:7903/ to the Opera container
+
+version: "3"
+services:
+  chrome:
+    image: selenium/node-chrome:4.0.0-beta-3-20210426
+    volumes:
+      - /dev/shm:/dev/shm
+    depends_on:
+      - selenium-hub
+    environment:
+      - SE_EVENT_BUS_HOST=selenium-hub
+      - SE_EVENT_BUS_PUBLISH_PORT=4442
+      - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
+      - SE_NODE_SESSION_TIMEOUT=10
+      - SE_NODE_MAX_SESSIONS=2
+      - SE_NODE_OVERRIDE_MAX_SESSIONS=true
+#      - VNC_NO_PASSWORD=1
+#      - VNC_VIEW_ONLY=1  
+    ports:
+      - "6900:5900"
+      - "7900:7900"
+
+  edge:
+    image: selenium/node-edge:4.0.0-beta-3-20210426
+    volumes:
+      - /dev/shm:/dev/shm
+    depends_on:
+      - selenium-hub
+    environment:
+      - SE_EVENT_BUS_HOST=selenium-hub
+      - SE_EVENT_BUS_PUBLISH_PORT=4442
+      - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
+    ports:
+      - "6901:5900"
+      - "7901:7900"
+
+  firefox:
+    image: selenium/node-firefox:4.0.0-beta-3-20210426
+    volumes:
+      - /dev/shm:/dev/shm
+    depends_on:
+      - selenium-hub
+    environment:
+      - SE_EVENT_BUS_HOST=selenium-hub
+      - SE_EVENT_BUS_PUBLISH_PORT=4442
+      - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
+    ports:
+      - "6902:5900"
+      - "7902:7900"
+
+  opera:
+    image: selenium/node-opera:4.0.0-beta-3-20210426
+    volumes:
+      - /dev/shm:/dev/shm
+    depends_on:
+      - selenium-hub
+    environment:
+      - SE_EVENT_BUS_HOST=selenium-hub
+      - SE_EVENT_BUS_PUBLISH_PORT=4442
+      - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
+    ports:
+      - "6903:5900"
+      - "7903:7900"
+
+  selenium-hub:
+    image: selenium/hub:4.0.0-beta-3-20210426
+    container_name: selenium-hub
+    ports:
+      - "4442:4442"
+      - "4443:4443"
+      - "4444:4444"
+
+  jenkins:
+    image: jenkins/jenkins:lts
+    privileged: true
+    user: root
+    container_name: jenkins
+    volumes:
+      - jenkins_home:/var/jenkins_home
+    ports:
+      - 8090:8080
+      - 50000:50000
+
+volumes:
+  jenkins_home:
