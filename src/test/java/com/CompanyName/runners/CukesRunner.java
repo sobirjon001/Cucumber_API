@@ -15,7 +15,7 @@ import org.junit.runner.RunWith;
         features = "src/test/resources/features",
         glue = "com/CompanyName/projects",
         dryRun = false
-//        ,tags = "@3002"
+        ,tags = "@2001"
 )
 public class CukesRunner {
 }
