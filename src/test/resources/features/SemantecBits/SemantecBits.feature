@@ -69,4 +69,4 @@ Feature: Some of interview practices for Semantic Bits
     Given I open Semantic Bits website
     When I select "Our Team" inside "About" module
     Then I verify I'm in "Our Team" page
-    Then I verify Name "Chris" is appeared 13 times
+    Then I verify Name "Chris" is appeared 14 times
