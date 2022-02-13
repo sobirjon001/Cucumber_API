@@ -1,4 +1,4 @@
-@fruitStore
+
 Feature: Orders Create, Update, delete
 
   This feature includes scenarios creating and modifying orders
