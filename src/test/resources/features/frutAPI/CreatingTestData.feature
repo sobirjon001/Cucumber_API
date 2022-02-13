@@ -1,4 +1,4 @@
-@all
+@fruitStore
 Feature: Creating, Updating, deleting test data
 
   This feature will exercise creating, updating, deleting data.
